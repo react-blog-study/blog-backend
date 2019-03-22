@@ -1,8 +1,6 @@
 const Joi = require("joi");
 const Account = require("models/Account");
 exports.sendAuthEmail = async ctx => {
-  const { email } = ctx;
-
   const schema = Joi.object().keys({
     email: Joi.string()
       .email()
@@ -24,12 +22,12 @@ exports.sendAuthEmail = async ctx => {
   }
 
   if (existing) {
-    ctx.body = {
+    return (ctx.body = {
       idUser: true
-    };
+    });
   } else {
-    ctx.body = {
+    return (ctx.body = {
       isUser: false
-    };
+    });
   }
 };

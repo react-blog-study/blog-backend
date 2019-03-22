@@ -26,7 +26,7 @@ const Account = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-Account.statics.findByEmail = function(email) {
+Account.statics.findByEmail = function({ email }) {
   return this.findOne({ "profile.email": email });
 };
 
