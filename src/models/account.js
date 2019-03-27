@@ -5,29 +5,47 @@ const Account = new Schema({
   profile: {
     email: String,
     username: String,
-    id: String,
-    introduce: String,
+    userId: String,
+    short_intro: String,
+    long_intro: String,
     thumbnail: { type: String, default: "/static/images/default_thumbnail.png" }
   },
   social: {
     git: {
-      id: String,
+      url: String,
       accessToken: String
     },
     google: {
-      id: String,
+      url: String,
       accessToken: String
     },
     facebook: {
-      id: String,
+      url: String,
       accessToken: String
     }
   },
-  createdAt: { type: Date, default: Date.now }
+  homepage: String,
+  createdAt: { type: Date, default: Date.now },
+  del_yn: { type: Boolean, default: false }
 });
 
-Account.statics.findByEmail = function({ email }) {
+Account.statics.findByUserId = function(userId) {
+  return this.fineOne({ "profile.userId": userId }).exec();
+};
+
+Account.statics.findByEmail = function(email) {
   return this.findOne({ "profile.email": email });
+};
+
+// 회원가입
+Account.statics.localRegister = function(email) {
+  const account = new this({
+    profile: {
+      email
+    }
+  });
+
+  return account.save();
 };
 
 module.exports = mongoose.model("Account", Account);
