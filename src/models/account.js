@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-
+const { generateToken } = require("lib/token");
 const Account = new Schema({
   profile: {
     email: String,
@@ -37,6 +37,12 @@ Account.statics.findByEmail = function(email) {
   return this.findOne({ "profile.email": email });
 };
 
+Account.statics.findByEmailUserId = function({ userId, email }) {
+  return this.findOne({
+    $or: [{ "profile.userId": userId }, { email }]
+  }).exec();
+};
+
 // 회원가입
 Account.statics.localRegister = function(email) {
   const account = new this({
@@ -46,6 +52,15 @@ Account.statics.localRegister = function(email) {
   });
 
   return account.save();
+};
+
+Account.methods.generateToken = function() {
+  const payload = {
+    _id: this._id,
+    profile: this.profile
+  };
+
+  return generateToken(payload, "account");
 };
 
 module.exports = mongoose.model("Account", Account);

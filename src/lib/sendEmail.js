@@ -10,8 +10,6 @@ exports.sendEmail = (email, subject, content) => {
     }
   });
 
-  console.log(email);
-
   const mailOptions = {
     from: "yuncheol92@gmail.com",
     to: email,
