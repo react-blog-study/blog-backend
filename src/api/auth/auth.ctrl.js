@@ -4,51 +4,76 @@ const { sendEmail } = require("lib/sendEmail");
 const EmailAuth = require("models/emailAuth");
 const { generateToken } = require("lib/token");
 
-// 로컬 회원가입
+/*
+ * 로컬 회원가입
+ */
 exports.localRegister = async ctx => {
+  // 값 체크
   const schema = Joi.object().keys({
-    userId: Joi.string()
-      .min(3)
-      .max(16)
-      .required(),
-    email: Joi.string()
-      .email()
-      .required(),
-    useranme: Joi.string()
-      .min(1)
-      .max(40)
-      .required(),
-    short_intro: Joi.string()
+    registerToken: Joi.string().required(),
+    registerForm: Joi.object().keys({
+      username: Joi.string()
+        .min(1)
+        .max(40)
+        .required(),
+      email: Joi.string()
+        .email()
+        .required(),
+      userId: Joi.string()
+        .min(3)
+        .max(16)
+        .required(),
+      short_intro: Joi.string()
+        .allow("")
+        .max(140)
+        .optional()
+    })
   });
 
-  const result = Joi.validate(ctx.body.request, schema);
+  const result = Joi.validate(ctx.request.body, schema);
 
   if (result.error) {
+    console.log(result.error);
+
     ctx.status = 400;
+    ctx.body = {
+      name: "WRONG_SCHEMA",
+      payload: result.error
+    };
     return;
   }
 
+  const { registerForm, registerToken } = ctx.request.body;
+  const { email, userId } = registerForm;
+
+  // 중복검사
   let existing = null;
   try {
-    existing = await Account.findBuEmailOrUsername(ctx.request.body);
+    existing = await Account.findByEmailOrUserId({ email, userId });
+
+    if (existing) {
+      ctx.status = 409;
+      ctx.body = {
+        name: "DUPLICATED_ACCOUNT",
+        key: existing.email === ctx.request.body.email ? "email" : "userId"
+      };
+      return;
+    }
   } catch (e) {
     ctx.throw(500, e);
   }
 
-  if (existing) {
-    ctx.status = 409;
-    ctx.body = {
-      key: existing.email === ctx.request.body.email ? "email" : "userId"
-    };
-  }
-
+  // 회원가입
   let account = null;
   try {
-    account = await Account.localRegister(ctx.request.body);
+    account = await Account.localRegister(registerForm);
   } catch (e) {
     ctx.throw(500, e);
   }
 
+  console.log(account);
+
+  // 토큰생성
   let token = null;
   try {
     token = await account.generateToken();
@@ -60,12 +85,20 @@ exports.localRegister = async ctx => {
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24
   });
-  ctx.body = account.profile;
+  ctx.body = {
+    user: account.profile,
+    token
+  };
 };
 
-// 로컬 로그인
+/*
+ * 로컬 로그인
+ */
 exports.localLogin = async ctx => {};
 
+/*
+ * 로그인 체크
+ */
 exports.check = ctx => {
   const { user } = ctx.request;
   if (!user) {
@@ -76,6 +109,9 @@ exports.check = ctx => {
   ctx.body = user.profile;
 };
 
+/*
+ * 이메일, 유저아이디 중복검사
+ */
 exports.exists = async ctx => {
   const { key, value } = ctx.params;
   let account = null;
@@ -88,12 +124,12 @@ exports.exists = async ctx => {
     ctx.throw(500, e);
   }
 
-  ctx.body = {
-    exists: account !== null
-  };
+  ctx.body = account !== null;
 };
 
-// 로그아웃
+/*
+ * 로그아웃
+ */
 exports.logout = ctx => {
   ctx.cookies.set("accessToken", null, {
     maxAge: 0,
@@ -103,7 +139,9 @@ exports.logout = ctx => {
   ctx.status = 204;
 };
 
-// 인증메일 보내기
+/*
+ * 인증메일 보내기
+ */
 exports.sendAuthEmail = async ctx => {
   const schema = Joi.object().keys({
     email: Joi.string()
@@ -174,6 +212,9 @@ exports.sendAuthEmail = async ctx => {
   }
 };
 
+/*
+ * 인증메일 코드확인
+ */
 exports.getCode = async ctx => {
   const { code } = ctx.params;
 
@@ -195,6 +236,8 @@ exports.getCode = async ctx => {
       email,
       registerToken
     };
+
+    console.log(email);
 
     await auth.use();
   } catch (e) {

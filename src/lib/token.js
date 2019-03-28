@@ -11,7 +11,6 @@ const generateToken = (payload, options) => {
   if (!jwpOptions.expiresIn) {
     delete jwtOptions.expiresIn;
   }
-  console.log(jwtSecret);
 
   return new Promise((resolve, reject) => {
     jwt.sign(payload, jwtSecret, jwpOptions, (error, token) => {

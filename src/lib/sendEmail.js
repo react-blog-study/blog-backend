@@ -5,8 +5,8 @@ exports.sendEmail = (email, subject, content) => {
     service: "gmail",
     host: "smtp.gmail.com",
     auth: {
-      user: "yuncheol92@gmail.com",
-      pass: "dbscjf!234"
+      user: process.env.GMAIL_ID,
+      pass: process.env.GMAIL_PW
     }
   });
 
@@ -21,7 +21,7 @@ exports.sendEmail = (email, subject, content) => {
     if (error) {
       console.log(error);
     } else {
-      console.log("Email sendt :" + info.response);
+      console.log("Email send :" + info.response);
     }
   });
 };
