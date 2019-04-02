@@ -8,7 +8,7 @@ const Account = new Schema({
     userId: String,
     short_intro: String,
     long_intro: String,
-    thumbnail: { type: String, default: "/static/images/default_thumbnail.png" }
+    thumbnail: { type: String, default: "static/images/default_thumbnail.png" }
   },
   social: {
     git: {
