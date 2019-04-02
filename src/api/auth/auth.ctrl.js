@@ -71,8 +71,6 @@ exports.localRegister = async ctx => {
     ctx.throw(500, e);
   }
 
-  console.log(account);
-
   // 토큰생성
   let token = null;
   try {
@@ -94,7 +92,40 @@ exports.localRegister = async ctx => {
 /*
  * 로컬 로그인
  */
-exports.localLogin = async ctx => {};
+exports.localLogin = async ctx => {
+  const { email } = ctx.request.body;
+
+  console.log(email);
+
+  if (!email) {
+    ctx.status = 400;
+    return;
+  }
+
+  let account = null;
+  try {
+    account = await Account.findByEmail(email);
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+
+  let token = null;
+  try {
+    token = await account.generateToken();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+
+  ctx.cookies.set("access_token", token, {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24
+  });
+
+  ctx.body = {
+    user: account.profile,
+    token
+  };
+};
 
 /*
  * 로그인 체크
@@ -106,7 +137,9 @@ exports.check = ctx => {
     return;
   }
 
-  ctx.body = user.profile;
+  ctx.body = {
+    user: user.profile
+  };
 };
 
 /*
@@ -168,7 +201,7 @@ exports.sendAuthEmail = async ctx => {
   try {
     const emailKeywords = user
       ? {
-          type: "login",
+          type: "email-login",
           text: "로그인"
         }
       : {
@@ -236,8 +269,6 @@ exports.getCode = async ctx => {
       email,
       registerToken
     };
-
-    console.log(email);
 
     await auth.use();
   } catch (e) {

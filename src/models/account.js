@@ -39,7 +39,7 @@ Account.statics.findByEmail = function(email) {
 
 Account.statics.findByEmailOrUserId = function({ userId, email }) {
   return this.findOne({
-    $or: [{ "profile.userId": userId }, { email }]
+    $or: [{ "profile.userId": userId }, { "profile.email": email }]
   }).exec();
 };
 
