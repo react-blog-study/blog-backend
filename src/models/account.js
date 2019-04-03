@@ -8,6 +8,12 @@ const Account = new Schema({
     userId: String,
     short_intro: String,
     long_intro: String,
+    profile_links: {
+      email: String,
+      github: String,
+      twitter: String,
+      facebook: String
+    },
     thumbnail: { type: String, default: "static/images/default_thumbnail.png" }
   },
   social: {
@@ -30,7 +36,7 @@ const Account = new Schema({
 });
 
 Account.statics.findByUserId = function(userId) {
-  return this.fineOne({ "profile.userId": userId }).exec();
+  return this.findOne({ "profile.userId": userId }).exec();
 };
 
 Account.statics.findByEmail = function(email) {
