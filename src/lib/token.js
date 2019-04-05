@@ -51,10 +51,10 @@ exports.jwtMiddleware = async (ctx, next) => {
     }
 
     // ctx.request.user 에 디코딩된 값을 넣어줍니다
-    ctx.request.user = decoded;
+    ctx.user = decoded;
   } catch (e) {
     // token validate 실패
-    ctx.request.user = null;
+    ctx.user = null;
   }
 
   return next();

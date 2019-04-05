@@ -30,7 +30,7 @@ const Account = new Schema({
       accessToken: String
     }
   },
-  homepage: String,
+
   createdAt: { type: Date, default: Date.now },
   del_yn: { type: Boolean, default: false }
 });
@@ -75,6 +75,19 @@ Account.methods.generateToken = function() {
   };
 
   return generateToken(payload);
+};
+
+Account.methods.updateProfile = function(user, { username, short_intro }) {
+  return this.update(
+    user._id,
+    {
+      $set: {
+        "profile.username": username,
+        "profile.shotr_intro": short_intro
+      }
+    },
+    { new: true }
+  ).exec();
 };
 
 module.exports = mongoose.model("Account", Account);

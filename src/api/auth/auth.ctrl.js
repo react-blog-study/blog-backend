@@ -131,7 +131,7 @@ exports.localLogin = async ctx => {
  * 로그인 체크
  */
 exports.check = ctx => {
-  const { user } = ctx.request;
+  const { user } = ctx;
   if (!user) {
     ctx.status = 403;
     return;
@@ -243,6 +243,10 @@ exports.sendAuthEmail = async ctx => {
   } catch (e) {
     ctx.throw(500, e);
   }
+
+  ctx.body = {
+    isUser: !!user
+  };
 };
 
 /*

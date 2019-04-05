@@ -24,10 +24,6 @@ exports.getProfile = async ctx => {
   try {
     const profile = ctx.selectedUser.profile;
 
-    console.log(profile);
-    console.log(profile);
-    console.log(profile);
-
     ctx.body = {
       ...pick(profile, [
         "username",
