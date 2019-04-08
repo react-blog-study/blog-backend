@@ -52,3 +52,43 @@ exports.updateProfile = async ctx => {
   }
   ctx.body = account.profile;
 };
+
+exports.updateProfileLinks = async ctx => {
+  const schema = Joi.object().keys({
+    email: Joi.string()
+      .email()
+      .allow(""),
+    github: Joi.string().allow(""),
+    twitter: Joi.string().allow(""),
+    facebook: Joi.string().allow(""),
+    homepage: Joi.string().allow("")
+  });
+
+  console.log(ctx.request.body);
+
+  const result = Joi.validate(ctx.request.body.profileLinks, schema);
+  if (result.error) {
+    ctx.status = 400;
+    console.log(result.error);
+
+    ctx.bodu = {
+      name: "WRONG_SCHMEA",
+      payload: result.error
+    };
+    return;
+  }
+  const { user } = ctx;
+  const { profileLinks } = ctx.request.body;
+  try {
+    const account = await Account.findById(user._id);
+    if (!account) {
+      ctx.throw(500, "Invalid Profile");
+    }
+
+    account.profile.profile_links = profileLinks;
+    await account.save();
+    ctx.body = profileLinks;
+  } catch (e) {
+    console.log(500, e);
+  }
+};

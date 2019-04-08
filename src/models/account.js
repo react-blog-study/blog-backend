@@ -12,7 +12,8 @@ const Account = new Schema({
       email: String,
       github: String,
       twitter: String,
-      facebook: String
+      facebook: String,
+      homepage: String
     },
     thumbnail: { type: String, default: "static/images/default_thumbnail.png" }
   },
