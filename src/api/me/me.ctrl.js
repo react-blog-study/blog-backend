@@ -92,3 +92,33 @@ exports.updateProfileLinks = async ctx => {
     console.log(500, e);
   }
 };
+
+exports.updateLongIntro = async ctx => {
+  const { longIntro } = ctx.request.body;
+
+  console.log(longIntro);
+  console.log(longIntro);
+  console.log(longIntro);
+  console.log(longIntro);
+  console.log("111");
+
+  if (typeof longIntro !== "string") {
+    ctx.status = 400;
+    return;
+  }
+
+  const { user } = ctx;
+
+  try {
+    const account = await Account.findById(user._id);
+    if (!account) {
+      ctx.throw(500, "Invalid Profile");
+    }
+    account.profile.long_intro = longIntro;
+    await account.save();
+
+    ctx.body = longIntro;
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+};
